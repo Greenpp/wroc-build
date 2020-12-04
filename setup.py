@@ -7,7 +7,7 @@ setup(
     url='https://github.com/Greenpp/wroc-build',
     author='Jakub Ciszek',
     packages=find_packages(),
-    package_data={'model': ['./wroclaw_building_footprint/seg_model.pt']},
+    package_data={'wroclaw_building_footprint': ['model/seg_model.pt']},
     install_requires=[
         'torch',
         'torchvision',
