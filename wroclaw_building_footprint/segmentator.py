@@ -74,13 +74,17 @@ class Segmentator:
         self,
         longitude: float,
         latitude: float,
+        area_size: float = 153.6,
         combination_beta1: float = 1,
-        combination_beta2: float = 1.1,
+        combination_beta2: float = 1.5,
+        binary_threshold: float = 0.3,
+        closing_kernel_size: int = 5,
+        opening_kernel_size: int = 5,
     ) -> Segmentation:
         """
         Create Segmentation object, containing coordinates, image and masks, for given location
         """
-        img = self.map_extractor.get_area_at(longitude, latitude)
+        img = self.map_extractor.get_area_at(longitude, latitude, area_size)
         img_tiles = split_img(img)
 
         img = img.resize((256, 256), Image.BILINEAR)
@@ -91,9 +95,7 @@ class Segmentator:
         batch = torch.cat([img_tensor, tiles_batch])
         segmentation_output = self.model(batch).detach().numpy()[:, 0, :]
 
-        img_mask = segmentation_output[0, :]
-
-        tiles_masks = segmentation_output[1:, :]
+        img_mask, *tiles_masks = segmentation_output
         tiles_mask = merge_masks(tiles_masks)
         tiles_mask = cv2.resize(tiles_mask, (256, 256))
 
@@ -103,7 +105,12 @@ class Segmentator:
             combination_beta1,
             combination_beta2,
         )
-        binary_mask = create_binary_mask(combined_mask)
+        binary_mask = create_binary_mask(
+            combined_mask,
+            binary_threshold,
+            closing_kernel_size,
+            opening_kernel_size,
+        )
 
         return Segmentation(
             longitude,
