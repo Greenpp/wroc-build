@@ -1,3 +1,6 @@
+import os
+from distutils.sysconfig import get_python_lib
+
 import cv2
 import numpy as np
 import torch
@@ -9,6 +12,12 @@ from ._postprocess import combine_masks, create_binary_mask, merge_masks
 from ._preprocess import create_batch, split_img
 from ._transforms import get_preprocessing_transform
 from .extractor import MapExtractor
+
+BASE_DIR = None
+if os.path.isfile(get_python_lib() + '/plateDetect'):
+    BASE_DIR = get_python_lib() + '/plateDetect'
+else:
+    BASE_DIR = os.path.dirname(__file__)
 
 
 class Segmentation:
@@ -67,7 +76,7 @@ class Segmentator:
         """
         self.model = DeepLabV3Plus(encoder_name='resnet34', activation='sigmoid')
 
-        self.model.load_state_dict(torch.load('./seg_model.pt'))
+        self.model.load_state_dict(torch.load(f'{BASE_DIR}/seg_model.pt'))
         self.model.eval()
 
     def segment(
