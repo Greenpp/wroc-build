@@ -76,7 +76,7 @@ class Segmentator:
         """
         self.model = DeepLabV3Plus(encoder_name='resnet34', activation='sigmoid')
 
-        self.model.load_state_dict(torch.load(f'{BASE_DIR}/seg_model.pt'))
+        self.model.load_state_dict(torch.load(f'{BASE_DIR}/model/seg_model.pt'))
         self.model.eval()
 
     def segment(
