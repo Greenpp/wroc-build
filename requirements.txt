@@ -1,7 +1,6 @@
 --find-links https://download.pytorch.org/whl/torch_stable.html
 torch==1.7.0+cu110 
 torchvision==0.8.1+cu110
-torchaudio===0.7.0
 numpy===1.19.4
 Pillow===8.0.1
 opencv-python===4.4.0.46
