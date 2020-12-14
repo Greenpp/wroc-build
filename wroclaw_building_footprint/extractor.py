@@ -11,8 +11,15 @@ def _calculate_bounding_box(
     center_lon: float,
     side_length: float,
 ) -> Iterable[float]:
-    """
-    Calculate bounding box for WebMapService protocol
+    """Calculate a square bounding box around given coordinates
+
+    Args:
+        center_lat: Center latitude to calculate bounding box around.
+        center_lon: Center longitude to calculate bounding box around.
+        side_length: Bounding box side length.
+
+    Returns:
+        Four floats, bottom-left longitude, bottom-left latitude, upper-right longitude, upper-right latitude.
     """
     l = side_length / 2
 
@@ -39,6 +46,8 @@ def _calculate_bounding_box(
 
 
 class MapExtractor:
+    """Class used to extract orthophoto map fragments."""
+
     def __init__(
         self,
         url: str = 'http://gis1.um.wroc.pl/arcgis/services/ogc/OGC_ortofoto_2018/MapServer/WMSServer?',
@@ -46,8 +55,15 @@ class MapExtractor:
         self.wms = WebMapService(url)
 
     def get_area_at(self, lon: float, lat: float, area_size: float):
-        """
-        Extracts map fragment around a given point and return it as a PIL image
+        """Create an image of the specified area.
+
+        Args:
+            lon: Center longitude of the area.
+            lat: Center latitude of the area.
+            area_size: Side length of the area.
+
+        Returns:
+            An PIL Image orthophoto of the selected area.
         """
         bbox = _calculate_bounding_box(lon, lat, area_size)
 

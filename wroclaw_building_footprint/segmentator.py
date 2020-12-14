@@ -21,6 +21,17 @@ else:
 
 
 class Segmentation:
+    """Class representing the result of the map segmentation.
+
+    Attributes:
+        longitude: The selected longitude.
+        latitude: The selected latitude.
+        img: The extracted orthophoto.
+        probability_mask: The generated probability mask with values in range 0-1.
+        binary_mask: The generated binary mask with values 0 or 1.
+
+    """
+
     def __init__(
         self,
         longitude: float,
@@ -35,10 +46,20 @@ class Segmentation:
         self.probability_mask = probability_mask
         self.binary_mask = binary_mask
 
-    def get_building_probability(self, radius: int = 1) -> float:
+    def get_building_probability(self, size: int = 2) -> float:
+        """Calculate the probability of a building being at the selected coordinates.
+
+        The returned probability is a mean of all probabilities within a square with a given side length from the center.
+        With default segmentation parameters, the generated binary masks mark areas with probability >30% as buildings.
+
+        Args:
+            size: An integer length of the calculation square side.
+
+        Returns:
+            A float representation of the probability of building at the selected coordinates in the range 0-1.
         """
-        Calculate the mean probability of building being in the center of the selected location, based on probability mask
-        """
+        radius = size // 2
+
         min_y = 127 - (radius - 1)
         max_y = 128 + (radius - 1)
 
@@ -51,19 +72,30 @@ class Segmentation:
         return probability
 
     def show_img(self) -> None:
+        """Show the segmented orthophoto with matplotlib"""
         plt.imshow(self.img)
+        plt.axis('off')
+        plt.tight_layout()
         plt.show()
 
     def show_probability_mask(self) -> None:
+        """Show the generated probability mask with matplotlib"""
         plt.imshow(self.probability_mask, cmap='gray')
+        plt.axis('off')
+        plt.tight_layout()
         plt.show()
 
     def show_binary_mask(self) -> None:
+        """Show the generated binary mask with matplotlib"""
         plt.imshow(self.binary_mask, cmap='gray')
+        plt.axis('off')
+        plt.tight_layout()
         plt.show()
 
 
 class Segmentator:
+    """Class used to generate building footprint masks for Wrocław."""
+
     def __init__(self) -> None:
         self.map_extractor = MapExtractor()
         self.preprocess_transform = get_preprocessing_transform()
@@ -71,9 +103,7 @@ class Segmentator:
         self._load_model()
 
     def _load_model(self) -> None:
-        """
-        Setup segmentation model
-        """
+        """Setup the segmentation model"""
         self.model = DeepLabV3Plus(encoder_name='resnet34', activation='sigmoid')
 
         self.model.load_state_dict(torch.load(f'{BASE_DIR}/model/seg_model.pt'))
@@ -90,8 +120,20 @@ class Segmentator:
         closing_kernel_size: int = 5,
         opening_kernel_size: int = 5,
     ) -> Segmentation:
-        """
-        Create Segmentation object, containing coordinates, image and masks, for given location
+        """Generate segmentation mask for a square area around given coordinates.
+
+        Args:
+            longitude: Longitude of the center of the area to segment.
+            latitude: Latitude of the center of the area to segment.
+            area_size: Length of the side of the area in meters.
+            combination_beta1: Weight applied to the whole image mask during combination.
+            combination_beta2: Weight applied to the tiled image mask during combination.
+            binary_threshold: The minimal probability to classify an area as a building during the binary mask creation, must be in the range 0-1.
+            closing_kernel_size: Size of the closing operation kernel.
+            opening_kernel_size: Size of the opening operation kernel.
+
+        Returns:
+            An object of Segmentation class.
         """
         img = self.map_extractor.get_area_at(longitude, latitude, area_size)
         img_tiles = split_img(img)

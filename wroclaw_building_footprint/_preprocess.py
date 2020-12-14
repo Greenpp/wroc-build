@@ -8,10 +8,10 @@ from torchvision import transforms as T
 def split_img(
     img: Image.Image,
 ) -> Iterable[Image.Image]:
-    """
-    Split single 512x512 image into 4 256x256 tiles
+    """Split single 512x512 image into 4 256x256 tiles.
 
-    The returned order is: upper-left, upper-right, lower-left, lower-right
+    Returns:
+        Four PIL Images, upper-left, upper-right, lower-left, lower-right.
     """
     up_left = img.crop((0, 0, 256, 256))
     up_right = img.crop((256, 0, 512, 256))
@@ -25,8 +25,10 @@ def create_batch(
     images: Iterable[Image.Image],
     transform: T.Compose,
 ) -> torch.Tensor:
-    """
-    Transform images into single tensor compatible with segmentation model
+    """Transform images and stack them into tensor.
+
+    Returns:
+        PyTorch tensor of stacked images.
     """
     tensors = []
 

@@ -5,9 +5,7 @@ COLOR_MEAN = torch.Tensor([77.63 / 255, 89.57 / 255, 101.36 / 255]).reshape((3, 
 
 
 def get_preprocessing_transform() -> T.Compose:
-    """
-    Create a preprocessing transform for the segmentation model
-    """
+    """Create a preprocessing transform for the segmentation model."""
     composition = T.Compose(
         [
             T.ToTensor(),
